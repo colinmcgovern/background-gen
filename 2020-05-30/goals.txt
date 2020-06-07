@@ -1,0 +1,7 @@
+Goal: create perlin noise fire version of image DONE
+Goal: gif output DONE
+Goal: display perlin noise DONE
+Goal: Perlin noise with fire pallette
+Goal: animated rising fire. 
+Goal: Make computationally expensive enough to justify pthreading
+Goal: Once all above goals are complete. Organize and save to github

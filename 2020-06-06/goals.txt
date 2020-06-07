@@ -1,0 +1,20 @@
+Goal: create perlin noise fire version of image DONE
+Goal: gif output DONE
+Goal: display perlin noise DONE
+
+//Gen 1
+Goal: translation function DONE
+Goal: sine function hor and vertical
+Goal: pallette rotation function. seperate from image generator
+Goal: 3 patterns generators (gradient, checker, square around border)
+Goal: header file to help organize
+
+//Gen 2
+Goal: translation at arbitrary angle
+Goal: sine at arbitrary angle
+Goal: pattern upload
+Goal: Layered images
+Goal: pthreading 
+Goal: Exceptions
+
+Goal: Once all above goals are complete. Organize and save to github
