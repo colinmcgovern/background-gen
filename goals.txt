@@ -18,5 +18,5 @@ Goal: translation at arbitrary angle
 Goal: sine at arbitrary angle
 Goal: pattern upload
 Goal: Layered images
-Goal: Once everything is above, make a website interface so users can upload their own patterns
+Goal: Once everything is above, make a website interface so users can upload their own patterns and download their custom gifs
 
