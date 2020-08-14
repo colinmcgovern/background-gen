@@ -18,6 +18,5 @@ Goal: translation at arbitrary angle
 Goal: sine at arbitrary angle
 Goal: pattern upload
 Goal: Layered images
-Goal: pthreading 
-Goal: Exceptions
+Goal: Once everything is above, make a website interface so users can upload their own patterns
 
