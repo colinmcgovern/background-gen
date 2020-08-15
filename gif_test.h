@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <functional>   // std::less
 #include <algorithm>    // std::sort, std::includes
+#include <string>
 
 #include "gif.h"
 
@@ -18,18 +19,9 @@ using namespace std;
 
 typedef array<int, 4> RGBA;
 
-typedef enum{
-  GRAD,
-  CHECKER
-} PATTERN;
-
 class frame{ 
 
 	private:
-		//Heat Map Generators
-		vector<vector<double> > generate_grad(int width, int height);
-		vector<vector<double> > generate_checker(int width, int height,
-												 uint size);
 
 		//Transformers
 		vector<uint8_t> translate_image(std::vector<uint8_t> input, uint width, uint height, int x_offset, int y_offset);
@@ -49,8 +41,7 @@ class frame{
 		frame(vector<uint8_t> &image, int width, int height,
 			vector<RGBA> palette, int palette_offset,
 			int x_offset, int y_offset,
-			double amp, double period, double phase_shift,
-			PATTERN pattern, uint checker_size);
+			double amp, double period, double phase_shift);
 
 	//Utitity
 	void print(vector<uint8_t> input, uint width, uint height);

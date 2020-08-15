@@ -9,82 +9,6 @@ void frame::print(vector<vector<double> > v){
 	}
 }
 
-vector<vector<double> > frame::generate_grad(int width, int height){
-
-	vector<vector<double> > output;
-
-	for(size_t i=0;i<width;i++){
-
-		vector<double> new_row;
-
-		for(size_t j=0;j<height;j++){
-
-			double width_val = (double(i)-double(width)/2)/double(width);
-			if(width_val<0){
-				width_val *= -1;
-			}
-
-			double height_val = (double(j)-double(height)/2)/double(height);
-			if(height_val<0){
-				height_val *= -1;
-			}
-
-			new_row.push_back(width_val+height_val);
-		}
-		output.push_back(new_row);
-	}
-
-	return output;
-}
-
-//TODO finish this
-vector<vector<double> > frame::generate_checker(int width, int height, 
-												uint size){
-
-	vector<vector<double> > output;
-
-	double dark = 1;
-	double light = 0;
-	uint ld_iter = 0;
-
-	for(size_t i=0;i<width;i++){
-
-		vector<double> new_row;
-
-		uint size_iter = 0;
-		uint is_dark = 0;
-
-		for(size_t j=0;j<height;j++){
-
-			if(is_dark){
-				new_row.push_back(dark);
-			}else{
-				new_row.push_back(light);
-			}
-
-			size_iter++;
-			if(size_iter>=size){
-				is_dark = !is_dark;
-				size_iter = 0;
-			}
-
-		}
-
-		output.push_back(new_row);
-
-		ld_iter++;
-		if(ld_iter>=size){
-			double temp = dark;
-			dark = light;
-			light = temp;
-			ld_iter = 0;
-		}
-
-	}
-
-	return output;
-}
-
 void frame::print(vector<uint8_t> input, uint width, uint height){
 	uint index = 0;
 	for(size_t i=0;i<width;i++){
@@ -244,16 +168,9 @@ vector<uint8_t> frame::generate_image(int width, int height,
 frame::frame(vector<uint8_t> &image, int width, int height,
 			vector<RGBA> palette, int palette_offset,
 			int x_offset, int y_offset,
-			double amp, double period, double phase_shift,
-			PATTERN pattern, uint checker_size){	
+			double amp, double period, double phase_shift){	
 
 	vector<vector<double> > heat_map;
-
-	if(pattern==GRAD){
-		heat_map = generate_grad(width,height);
-	}else{
-		heat_map = generate_checker(width,height,checker_size);
-	}
 
 	palette = rotate_palette(palette,palette_offset);
 
@@ -264,71 +181,78 @@ frame::frame(vector<uint8_t> &image, int width, int height,
 	image = vert_osc(image,width,height,amp,period,phase_shift);
 }
 
-int main(){
+int main(int argc, char** argv){ 
+  
+	const string heat_map_file = string(argv[2]);
+	const uint pallete_num = uint(argv[3]);
+	const uint pallete_movement_per_frame = uint(argv[4]);
+	const double x_movement_per_frame = double(argv[5]);
+	const double y_movement_per_frame = double(argv[6]);
+	const double amp = double(argv[7]);
+	const double period = double(argv[8]);
+	const double phase_shift_per_frame = double(argv[9]);
+	const uint num_frames = uint(argv[10]);
+	const uint delay = double(argv[11]);
+
+	//TODO heat_map loading here
 	
-	//Alternate palettes
-
-	//Fire
-	// vector<RGBA> palette;
-	// palette.push_back({128,17,0,255});
-	// palette.push_back({182,34,3,255});
-	// palette.push_back({215,53,2,255});
-	// palette.push_back({252,100,0,255});
-	// palette.push_back({255,117,0,255});
-	// palette.push_back({250,192,0,255});
-
-	//Melon
 	vector<RGBA> palette;
-	palette.push_back({243,85,136,255});
-	palette.push_back({255,187,180,255});
-	palette.push_back({113,169,90,255});
-	palette.push_back({0,121,68,255});
+	switch(pallete_num){
 
-	//Gradient
-	// vector<RGBA> palette;
-	// for(uint i=0;i<255;i++){
-	// 	palette.push_back({i,i,i,i});
-	// }
+		//Fire
+		case 0:
+			palette.push_back({128,17,0,255});
+			palette.push_back({182,34,3,255});
+			palette.push_back({215,53,2,255});
+			palette.push_back({252,100,0,255});
+			palette.push_back({255,117,0,255});
+			palette.push_back({250,192,0,255});
+		break;
 
-	//Black and white
-	// vector<RGBA> palette;
-	// palette.push_back({255,255,255,255});
-	// palette.push_back({0,0,0,255});
+		//Melon
+		case 1:
+			palette.push_back({243,85,136,255});
+			palette.push_back({255,187,180,255});
+			palette.push_back({113,169,90,255});
+			palette.push_back({0,121,68,255});
+		break;
 
-	int width = 8;
-	int height = 8;
+		//Gradient
+		case 2:
+			for(uint i=0;i<255;i++){
+				palette.push_back({i,i,i,i});
+			}
+		break;
+
+		//Black and white
+		default:
+			palette.push_back({255,255,255,255});
+			palette.push_back({0,0,0,255});
+		break;
+	}
 
 	double palette_offset = 0;
 
 	double x_offset = 0;
 	double y_offset = 0;
 
-	double amp = 10; //width/8;
-	double period = 3; //width/8;
 	double phase_shift = 0;
-	PATTERN pattern = CHECKER;
-	uint checker_size = 16;
-
-	const uint NUM_FRAMES = palette.size() * width;
 	
 	auto fileName = "output.gif";
 	int delay = 2;
 	GifWriter g;
 	GifBegin(&g, fileName, width, height, delay);
-	for(uint i=0;i<NUM_FRAMES;i++){
+	for(uint i=0;i<num_frames;i++){
 
 		vector<uint8_t> image;
 
-		// x_offset -= double(width)/double(NUM_FRAMES);
-		// y_offset -= double(height)/double(NUM_FRAMES);
+		palette_offset += pallete_movement_per_frame;
 
-		// palette_offset+=0.1;
+		phase_shift += phase_shift_per_frame;
 
-		phase_shift += 1;
-
-		frame(image,width,height,palette,int(palette_offset),
+		frame(image,heat_map,palette,int(palette_offset),
 			int(x_offset),int(y_offset),
-			amp,period,phase_shift,pattern,checker_size);
+			amp,period,phase_shift);
 
 		GifWriteFrame(&g, image.data(), width, height, delay);
 	}
