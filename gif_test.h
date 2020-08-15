@@ -38,10 +38,12 @@ class frame{
 		vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, vector<vector<double>> heat_map);
 
 	public: 
-		frame(vector<uint8_t> &image, int width, int height,
+		frame(vector<uint8_t> &image, vector<double> heat_map,
 			vector<RGBA> palette, int palette_offset,
 			int x_offset, int y_offset,
-			double amp, double period, double phase_shift);
+			double x_amp, double x_period, double x_phase_shift,
+			double y_amp, double y_period, double y_phase_shift
+			);
 
 	//Utitity
 	void print(vector<uint8_t> input, uint width, uint height);

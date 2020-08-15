@@ -81,6 +81,29 @@ std::vector<uint8_t> frame::translate_image(std::vector<uint8_t> input, uint wid
 	return desimplify(simple_output);
 }
 
+std::vector<uint8_t> frame::hor_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift){
+	std::vector<uint8_t> output(width * height * 4, 0);
+
+	vector<vector<RGBA>> simple_input = simplify(input,width,height);
+	vector<vector<RGBA>> simple_output = simplify(input,width,height);
+
+	for(size_t i=0;i<width;i++){
+
+		int i_shift = int( -cos((i*period)+phase_shift)*amp );
+
+		cout << i_shift << " "; //del
+
+		for(size_t j=0;j<height;j++){
+			uint new_i = (i + i_shift) % width;
+			simple_output[i][j] = simple_input[new_i][j];
+		}	
+	}
+
+	cout << endl; //del
+
+	return desimplify(simple_output);
+}
+
 std::vector<uint8_t> frame::vert_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift){
 	std::vector<uint8_t> output(width * height * 4, 0);
 
@@ -165,36 +188,53 @@ vector<uint8_t> frame::generate_image(int width, int height,
 	return output;
 }
 
-frame::frame(vector<uint8_t> &image, int width, int height,
+frame::frame(vector<uint8_t> &image, vector<double> heat_map,
 			vector<RGBA> palette, int palette_offset,
 			int x_offset, int y_offset,
-			double amp, double period, double phase_shift){	
-
-	vector<vector<double> > heat_map;
+			double x_amp, double x_period, double x_phase_shift,
+			double y_amp, double y_period, double y_phase_shift
+			){	
 
 	palette = rotate_palette(palette,palette_offset);
 
-	image = generate_image(width,height,palette,heat_map);
+	image = generate_image(heat_map.size(),heat_map[0].size(),
+							palette,heat_map);
 
 	image = translate_image(image,width,height,x_offset,y_offset);	
 
-	image = vert_osc(image,width,height,amp,period,phase_shift);
+	image = vert_osc(image,heat_map.size(),
+				heat_map[0].size(),x_amp,x_period,x_phase_shift);
+	image = vert_osc(image,heat_map.size(),
+				heat_map[0].size(),y_amp,y_period,y_phase_shift);
 }
 
 int main(int argc, char** argv){ 
   
 	const string heat_map_file = string(argv[2]);
+
 	const uint pallete_num = uint(argv[3]);
 	const uint pallete_movement_per_frame = uint(argv[4]);
+
 	const double x_movement_per_frame = double(argv[5]);
 	const double y_movement_per_frame = double(argv[6]);
-	const double amp = double(argv[7]);
-	const double period = double(argv[8]);
-	const double phase_shift_per_frame = double(argv[9]);
-	const uint num_frames = uint(argv[10]);
-	const uint delay = double(argv[11]);
 
-	//TODO heat_map loading here
+	const double x_amp = double(argv[7]);
+	const double x_period = double(argv[8]);
+	const double x_phase_shift_per_frame = double(argv[9]);
+
+	const double y_amp = double(argv[10]);
+	const double y_period = double(argv[11]);
+	const double y_phase_shift_per_frame = double(argv[12]);
+
+	const uint num_frames = uint(argv[13]);
+	const uint delay = double(argv[14]);
+
+	//loading heatmap from csv
+	//TODO finish this
+	vector<vector<double> > heat_map;
+	// while(getline(heat_map_file, ID, ',')) {
+	//     cout << ID << endl;
+	// }
 	
 	vector<RGBA> palette;
 	switch(pallete_num){
@@ -236,25 +276,32 @@ int main(int argc, char** argv){
 	double x_offset = 0;
 	double y_offset = 0;
 
-	double phase_shift = 0;
+	double x_phase_shift = 0;
+	double y_phase_shift = 0;
 	
 	auto fileName = "output.gif";
-	int delay = 2;
 	GifWriter g;
-	GifBegin(&g, fileName, width, height, delay);
+	GifBegin(&g, fileName, heat_map.size(),
+				heat_map[0].size(), delay);
 	for(uint i=0;i<num_frames;i++){
 
 		vector<uint8_t> image;
 
 		palette_offset += pallete_movement_per_frame;
 
-		phase_shift += phase_shift_per_frame;
+		x_phase_shift += x_phase_shift_per_frame;
+		y_phase_shift += y_phase_shift_per_frame;
+
+		x_offset += x_movement_per_frame;
+		y_offset += y_movement_per_frame;
 
 		frame(image,heat_map,palette,int(palette_offset),
 			int(x_offset),int(y_offset),
-			amp,period,phase_shift);
+			x_amp,x_period,x_phase_shift,
+			y_amp,y_period,y_phase_shift);
 
-		GifWriteFrame(&g, image.data(), width, height, delay);
+		GifWriteFrame(&g, image.data(), heat_map.size(),
+				heat_map[0].size(), delay);
 	}
 	GifEnd(&g);
 
