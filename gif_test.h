@@ -18,39 +18,46 @@ using namespace std;
 
 typedef array<int, 4> RGBA;
 
-typedef vector<vector<double> >  HEAT_MAP;
-
-enum PATTERN {
+typedef enum{
   GRAD,
   CHECKER
-};
+} PATTERN;
 
 class frame{ 
 
 	private:
 		//Heat Map Generators
-		HEAT_MAP generate_grad(int width, int height);
-		HEAT_MAP generate_checker(int width, int height, uint size);
+		vector<vector<double> > generate_grad(int width, int height);
+		vector<vector<double> > generate_checker(int width, int height,
+												 uint size);
 
 		//Transformers
-		vector<uint8_t> translate_image(std::vector<uint8_t> input, uint width, uint height, uint x_offset, uint y_offset);
-		vector<uint8_t> sine_image(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift);
-		vector<RGBA> rotate_palette(vector<RGBA> palette, uint palette_offset);
-		void print(vector<uint8_t> input, uint width, uint height);
+		vector<uint8_t> translate_image(std::vector<uint8_t> input, uint width, uint height, int x_offset, int y_offset);
+		
+		vector<uint8_t> hor_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift);
+		vector<uint8_t> vert_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift);
+		
+		vector<RGBA> rotate_palette(vector<RGBA> palette, int palette_offset);
 
 		//Helper Functions
 		vector<vector<RGBA>> simplify(vector<uint8_t> input, uint width, uint height);
 		vector<uint8_t> desimplify(vector<vector<RGBA>> input);
 
-		vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, HEAT_MAP heatmap);
+		vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, vector<vector<double>> heat_map);
 
 	public: 
-		frame(int width, int height,
-			vector<RGBA> palette, uint palette_offset,
-			uint x_offset, uint y_offset,
+		frame(vector<uint8_t> &image, int width, int height,
+			vector<RGBA> palette, int palette_offset,
+			int x_offset, int y_offset,
 			double amp, double period, double phase_shift,
-			PATTERN pattern, uint checker_size)
+			PATTERN pattern, uint checker_size);
 
-}
+	//Utitity
+	void print(vector<uint8_t> input, uint width, uint height);
+	void print(vector<vector<double> > v);
+
+};
+
+
 
 

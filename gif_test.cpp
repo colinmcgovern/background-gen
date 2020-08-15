@@ -1,6 +1,15 @@
 #include "gif_test.h"
 
-vector<vector<double> > generate_grad(int width, int height){
+void frame::print(vector<vector<double> > v){
+	for(auto &x: v){
+		for(auto &y: x){
+			cout << y << " ";
+		}
+		cout << endl;
+	}
+}
+
+vector<vector<double> > frame::generate_grad(int width, int height){
 
 	vector<vector<double> > output;
 
@@ -10,12 +19,12 @@ vector<vector<double> > generate_grad(int width, int height){
 
 		for(size_t j=0;j<height;j++){
 
-			double width_val = (double(i)-double(width)/2)/double(width)/2;
+			double width_val = (double(i)-double(width)/2)/double(width);
 			if(width_val<0){
 				width_val *= -1;
 			}
 
-			double height_val = (double(j)-double(height)/2)/double(height)/2;
+			double height_val = (double(j)-double(height)/2)/double(height);
 			if(height_val<0){
 				height_val *= -1;
 			}
@@ -29,7 +38,8 @@ vector<vector<double> > generate_grad(int width, int height){
 }
 
 //TODO finish this
-vector<vector<double> > generate_checker(int width, int height, uint size){
+vector<vector<double> > frame::generate_checker(int width, int height, 
+												uint size){
 
 	vector<vector<double> > output;
 
@@ -75,7 +85,7 @@ vector<vector<double> > generate_checker(int width, int height, uint size){
 	return output;
 }
 
-void print(vector<uint8_t> input, uint width, uint height){
+void frame::print(vector<uint8_t> input, uint width, uint height){
 	uint index = 0;
 	for(size_t i=0;i<width;i++){
 		for(size_t j=0;j<height;j++){
@@ -89,7 +99,8 @@ void print(vector<uint8_t> input, uint width, uint height){
 	}
 }
 
-vector<vector<RGBA>> simplify(vector<uint8_t> input, uint width, uint height){
+vector<vector<RGBA>> frame::simplify(vector<uint8_t> input, uint width,
+									 uint height){
 
 	vector<vector<RGBA>> output;
 
@@ -106,7 +117,6 @@ vector<vector<RGBA>> simplify(vector<uint8_t> input, uint width, uint height){
 			for(size_t k=0;k<4;k++){
 				new_val[k] = input[index++];
 			}
-			//cout << new_val[k][0] << " " << new_val[k][1] << " " << new_val[k][2] << " " << new_val[k][3] << endl; //del
 
 			new_row.push_back(new_val);
 
@@ -118,7 +128,7 @@ vector<vector<RGBA>> simplify(vector<uint8_t> input, uint width, uint height){
 	return output;
 }
 
-vector<uint8_t> desimplify(vector<vector<RGBA>> input){
+vector<uint8_t> frame::desimplify(vector<vector<RGBA>> input){
 	vector<uint8_t> output;
 	for(size_t i=0;i<input.size();i++){
 		for(size_t j=0;j<input[i].size();j++){
@@ -131,7 +141,8 @@ vector<uint8_t> desimplify(vector<vector<RGBA>> input){
 }
 
 //TODO needs tesing
-std::vector<uint8_t> translate_image(std::vector<uint8_t> input, uint width, uint height, uint x_offset, uint y_offset){
+std::vector<uint8_t> frame::translate_image(std::vector<uint8_t> input, uint width, uint height, 
+											int x_offset, int y_offset){
 	std::vector<uint8_t> output(width * height * 4, 0);
 
 	vector<vector<RGBA>> simple_input = simplify(input,width,height);
@@ -146,22 +157,30 @@ std::vector<uint8_t> translate_image(std::vector<uint8_t> input, uint width, uin
 	return desimplify(simple_output);
 }
 
-std::vector<uint8_t> sine_image(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift){
+std::vector<uint8_t> frame::vert_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift){
 	std::vector<uint8_t> output(width * height * 4, 0);
 
 	vector<vector<RGBA>> simple_input = simplify(input,width,height);
 	vector<vector<RGBA>> simple_output = simplify(input,width,height);
 
 	for(size_t i=0;i<width;i++){
+
+		int i_shift = int( sin((i*period)+phase_shift)*amp );
+
+		cout << i_shift << " "; //del
+
 		for(size_t j=0;j<height;j++){
-			simple_output[i][j] = simple_input[uint((sin((i*period)+phase_shift)*amp))%width][(j)%height];
+			uint new_i = (i + i_shift) % width;
+			simple_output[i][j] = simple_input[new_i][j];
 		}	
 	}
+
+	cout << endl; //del
 
 	return desimplify(simple_output);
 }
 
-vector<RGBA> rotate_palette(vector<RGBA> palette, uint palette_offset){
+vector<RGBA> frame::rotate_palette(vector<RGBA> palette, int palette_offset){
 	vector<RGBA> output;
 	for(size_t i=0;i<palette.size();i++){
 		output.push_back(palette[(i+palette_offset)%palette.size()]);
@@ -169,17 +188,10 @@ vector<RGBA> rotate_palette(vector<RGBA> palette, uint palette_offset){
 	return output;
 }
 
-vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, PATTERN pattern){
+vector<uint8_t> frame::generate_image(int width, int height,
+				 vector<RGBA> palette, vector<vector<double>> heat_map){
 
 	std::vector<uint8_t> output(width * height * 4, 0);
-
-	vector<vector<double> > intensity_grid;
-	if(pattern==GRAD){
-		intensity_grid = generate_grad(width,height);
-	}else if(pattern==CHECKER){
-		intensity_grid = generate_checker(width,height,16);
-	}
-
 
 	uint index = 0;
 
@@ -191,7 +203,7 @@ vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, PATT
 			uint blue=0;
 			uint a=0;
 
-			double intensity = intensity_grid[i][j]+0.5;
+			double intensity = heat_map[i][j];
 
 			for(size_t k=0;k<palette.size();k++){
 				if(intensity<double(k+1)/double(palette.size())){
@@ -229,14 +241,35 @@ vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, PATT
 	return output;
 }
 
-int main()
-{
-	int width = 128;
-	int height = 128;
+frame::frame(vector<uint8_t> &image, int width, int height,
+			vector<RGBA> palette, int palette_offset,
+			int x_offset, int y_offset,
+			double amp, double period, double phase_shift,
+			PATTERN pattern, uint checker_size){	
 
-	vector<RGBA> palette;
+	vector<vector<double> > heat_map;
+
+	if(pattern==GRAD){
+		heat_map = generate_grad(width,height);
+	}else{
+		heat_map = generate_checker(width,height,checker_size);
+	}
+
+	palette = rotate_palette(palette,palette_offset);
+
+	image = generate_image(width,height,palette,heat_map);
+
+	image = translate_image(image,width,height,x_offset,y_offset);	
+
+	image = vert_osc(image,width,height,amp,period,phase_shift);
+}
+
+int main(){
+	
+	//Alternate palettes
 
 	//Fire
+	// vector<RGBA> palette;
 	// palette.push_back({128,17,0,255});
 	// palette.push_back({182,34,3,255});
 	// palette.push_back({215,53,2,255});
@@ -244,33 +277,60 @@ int main()
 	// palette.push_back({255,117,0,255});
 	// palette.push_back({250,192,0,255});
 
+	//Melon
+	vector<RGBA> palette;
+	palette.push_back({243,85,136,255});
+	palette.push_back({255,187,180,255});
+	palette.push_back({113,169,90,255});
+	palette.push_back({0,121,68,255});
+
 	//Gradient
+	// vector<RGBA> palette;
 	// for(uint i=0;i<255;i++){
 	// 	palette.push_back({i,i,i,i});
 	// }
 
 	//Black and white
-	palette.push_back({255,255,255,255});
-	palette.push_back({0,0,0,255});
+	// vector<RGBA> palette;
+	// palette.push_back({255,255,255,255});
+	// palette.push_back({0,0,0,255});
 
-	vector<vector<uint8_t>> images;
-	for(size_t i=0;i<width;i++){
+	int width = 8;
+	int height = 8;
 
-		// palette = rotate_palette(palette,1);
+	double palette_offset = 0;
 
-		images.push_back(generate_image(width,height,palette,CHECKER));
-		// images[i] = sine_image(images[i],width,height,32,i,0);
-		//images[i] = translate_image(images[i],width,height,i,i);
-	}
+	double x_offset = 0;
+	double y_offset = 0;
+
+	double amp = 10; //width/8;
+	double period = 3; //width/8;
+	double phase_shift = 0;
+	PATTERN pattern = CHECKER;
+	uint checker_size = 16;
+
+	const uint NUM_FRAMES = palette.size() * width;
 	
-	auto fileName = "bwgif.gif";
+	auto fileName = "output.gif";
 	int delay = 2;
 	GifWriter g;
 	GifBegin(&g, fileName, width, height, delay);
-	for(size_t i=0;i<images.size();i++){
-		// print(images[i],width,height);
-		// cout << endl;
-		GifWriteFrame(&g, images[i].data(), width, height, delay);
+	for(uint i=0;i<NUM_FRAMES;i++){
+
+		vector<uint8_t> image;
+
+		// x_offset -= double(width)/double(NUM_FRAMES);
+		// y_offset -= double(height)/double(NUM_FRAMES);
+
+		// palette_offset+=0.1;
+
+		phase_shift += 1;
+
+		frame(image,width,height,palette,int(palette_offset),
+			int(x_offset),int(y_offset),
+			amp,period,phase_shift,pattern,checker_size);
+
+		GifWriteFrame(&g, image.data(), width, height, delay);
 	}
 	GifEnd(&g);
 
