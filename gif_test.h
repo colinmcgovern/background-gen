@@ -12,6 +12,10 @@
 #include <functional>   // std::less
 #include <algorithm>    // std::sort, std::includes
 #include <string>
+#include <fstream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 
 #include "gif.h"
 
@@ -38,7 +42,7 @@ class frame{
 		vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, vector<vector<double>> heat_map);
 
 	public: 
-		frame(vector<uint8_t> &image, vector<double> heat_map,
+		frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
 			vector<RGBA> palette, int palette_offset,
 			int x_offset, int y_offset,
 			double x_amp, double x_period, double x_phase_shift,

@@ -1,5 +1,6 @@
 #include "gif_test.h"
 
+
 void frame::print(vector<vector<double> > v){
 	for(auto &x: v){
 		for(auto &y: x){
@@ -89,22 +90,19 @@ std::vector<uint8_t> frame::hor_osc(std::vector<uint8_t> input, uint width, uint
 
 	for(size_t i=0;i<width;i++){
 
-		int i_shift = int( -cos((i*period)+phase_shift)*amp );
-
-		cout << i_shift << " "; //del
+		int j_shift = int( -cos((i*period/6.28)+phase_shift)*amp );
 
 		for(size_t j=0;j<height;j++){
-			uint new_i = (i + i_shift) % width;
-			simple_output[i][j] = simple_input[new_i][j];
+			uint new_j = (j + j_shift) % height;
+			simple_output[i][j] = simple_input[i][new_j];
 		}	
 	}
-
-	cout << endl; //del
 
 	return desimplify(simple_output);
 }
 
 std::vector<uint8_t> frame::vert_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift){
+
 	std::vector<uint8_t> output(width * height * 4, 0);
 
 	vector<vector<RGBA>> simple_input = simplify(input,width,height);
@@ -112,17 +110,13 @@ std::vector<uint8_t> frame::vert_osc(std::vector<uint8_t> input, uint width, uin
 
 	for(size_t i=0;i<width;i++){
 
-		int i_shift = int( sin((i*period)+phase_shift)*amp );
-
-		cout << i_shift << " "; //del
+		int i_shift = int( sin((i*period/6.28)+phase_shift)*amp );
 
 		for(size_t j=0;j<height;j++){
 			uint new_i = (i + i_shift) % width;
 			simple_output[i][j] = simple_input[new_i][j];
 		}	
 	}
-
-	cout << endl; //del
 
 	return desimplify(simple_output);
 }
@@ -188,7 +182,7 @@ vector<uint8_t> frame::generate_image(int width, int height,
 	return output;
 }
 
-frame::frame(vector<uint8_t> &image, vector<double> heat_map,
+frame::frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
 			vector<RGBA> palette, int palette_offset,
 			int x_offset, int y_offset,
 			double x_amp, double x_period, double x_phase_shift,
@@ -200,42 +194,97 @@ frame::frame(vector<uint8_t> &image, vector<double> heat_map,
 	image = generate_image(heat_map.size(),heat_map[0].size(),
 							palette,heat_map);
 
-	image = translate_image(image,width,height,x_offset,y_offset);	
+	image = translate_image(image,heat_map.size(),
+				heat_map[0].size(),x_offset,y_offset);	
 
-	image = vert_osc(image,heat_map.size(),
+	//del uncomment
+	image = hor_osc(image,heat_map.size(),
 				heat_map[0].size(),x_amp,x_period,x_phase_shift);
 	image = vert_osc(image,heat_map.size(),
 				heat_map[0].size(),y_amp,y_period,y_phase_shift);
 }
 
+vector<string> split(const string& str, const string& delim){
+    vector<string> tokens;
+    size_t prev = 0, pos = 0;
+    do
+    {
+        pos = str.find(delim, prev);
+        if (pos == string::npos) pos = str.length();
+        string token = str.substr(prev, pos-prev);
+        if (!token.empty()) tokens.push_back(token);
+        prev = pos + delim.length();
+    }
+    while (pos < str.length() && prev < str.length());
+    return tokens;
+}
+
 int main(int argc, char** argv){ 
-  
-	const string heat_map_file = string(argv[2]);
 
-	const uint pallete_num = uint(argv[3]);
-	const uint pallete_movement_per_frame = uint(argv[4]);
+	int width, height, bpp;
 
-	const double x_movement_per_frame = double(argv[5]);
-	const double y_movement_per_frame = double(argv[6]);
+	vector<vector<double> > heat_map;
 
-	const double x_amp = double(argv[7]);
-	const double x_period = double(argv[8]);
-	const double x_phase_shift_per_frame = double(argv[9]);
+    uint8_t* rgb_image = stbi_load("image2.png", &width, &height, &bpp, 3);
 
-	const double y_amp = double(argv[10]);
-	const double y_period = double(argv[11]);
-	const double y_phase_shift_per_frame = double(argv[12]);
+    for(int i=0;i<width;i++){
+    	vector<double> row;
+    	for(int j=0;j<height;j++){
+    		for(int k=0;k<4;k++){
+	    		row.push_back(double(rgb_image[i*width + j])/256);
+	    		cout << int(rgb_image[i*width + j*height + k]) << " "; //del
+	    	}
+    	}
+    	cout << endl; //del
+    	heat_map.push_back(row);
+    }
+    stbi_image_free(rgb_image);
 
-	const uint num_frames = uint(argv[13]);
-	const uint delay = double(argv[14]);
+	//TODO have these parameters taken from command line
+	// ifstream heat_map_csv("csvs/half.csv");
+
+	const uint pallete_num = 1;
+	const uint pallete_movement_per_frame = 0;
+
+	const double x_movement_per_frame = 0;
+	const double y_movement_per_frame = 0;
+
+	const double x_amp = 0;
+	const double x_period = 128;
+	const double x_phase_shift_per_frame = 1;
+
+	const double y_amp = 0;
+	const double y_period = 128;
+	const double y_phase_shift_per_frame = 1;
+
+	const uint num_frames = 1;
+	const uint delay = 1;
 
 	//loading heatmap from csv
 	//TODO finish this
-	vector<vector<double> > heat_map;
-	// while(getline(heat_map_file, ID, ',')) {
-	//     cout << ID << endl;
+
+	// string line;
+	// while (getline(heat_map_csv, line)){
+	// 	vector<double> row;
+	// 	vector<string> row_strings = split(line,",");
+	// 	for(auto &v: row_strings){
+	// 		row.push_back(stod(v));
+	// 	}
+	// 	heat_map.push_back(row);
 	// }
-	
+
+
+	//del
+	//Tesing csv reading
+	// for(int i=0;i<heat_map.size();i++){
+	// 	for(int j=0;j<heat_map[i].size();j++){
+	// 		cout << heat_map[i][j] << " ";
+	// 	}
+	// 	cout << endl;
+	// }
+	// exit(0);
+	//del
+
 	vector<RGBA> palette;
 	switch(pallete_num){
 
