@@ -225,15 +225,18 @@ int main(int argc, char** argv){
 
 	vector<vector<double> > heat_map;
 
-    uint8_t* rgb_image = stbi_load("image2.png", &width, &height, &bpp, 3);
+    uint8_t* rgb_image = stbi_load("test2.png", &width, &height, &bpp, 3);
 
     for(int i=0;i<width;i++){
     	vector<double> row;
     	for(int j=0;j<height;j++){
+    		int sum = 0;
     		for(int k=0;k<4;k++){
-	    		row.push_back(double(rgb_image[i*width + j])/256);
-	    		cout << int(rgb_image[i*width + j*height + k]) << " "; //del
+	    		sum += rgb_image[i*width + j*height + k];
+	    		cout << int(rgb_image[i*width + j*height + k]) << ","; //del
 	    	}
+	    	row.push_back(double(sum)/(256*3));
+	    	cout << "=" << double(sum)/(256*3) << " "; //del
     	}
     	cout << endl; //del
     	heat_map.push_back(row);
@@ -243,7 +246,7 @@ int main(int argc, char** argv){
 	//TODO have these parameters taken from command line
 	// ifstream heat_map_csv("csvs/half.csv");
 
-	const uint pallete_num = 1;
+	const uint pallete_num = 2;
 	const uint pallete_movement_per_frame = 0;
 
 	const double x_movement_per_frame = 0;
