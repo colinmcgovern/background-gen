@@ -225,7 +225,7 @@ int main(int argc, char** argv){
 
 	vector<vector<double> > heat_map;
 
-    uint8_t* rgb_image = stbi_load("images/4.jpeg", &width, &height, &channels, 3);
+    uint8_t* rgb_image = stbi_load("images/3.jpeg", &width, &height, &channels, 3);
 
     uint iter = 0;
 
@@ -245,10 +245,10 @@ int main(int argc, char** argv){
 	//TODO have these parameters taken from command line
 	// ifstream heat_map_csv("csvs/half.csv");
 
-	const uint pallete_num = 0;
+	const uint pallete_num = 5;
 	const uint pallete_movement_per_frame = 1;
 
-	const double x_movement_per_frame = width/15;
+	const double x_movement_per_frame = height/15;
 	const double y_movement_per_frame = height/30;
 
 	const double x_amp = 2;
@@ -260,13 +260,26 @@ int main(int argc, char** argv){
 	const double y_phase_shift_per_frame = 1;
 
 	const uint num_frames = 30;
-	const uint delay = 5;
+	const uint delay = 10;
 
 	vector<RGBA> palette;
 	switch(pallete_num){
 
-		//Fire
+		//Gradient
 		case 0:
+			for(uint i=0;i<255;i++){
+				palette.push_back({i,i,i,i});
+			}
+		break;
+
+		//Black and white
+		case 1:
+			palette.push_back({255,255,255,255});
+			palette.push_back({0,0,0,255});
+		break;
+
+		//Fire
+		case 2:
 			palette.push_back({128,17,0,255});
 			palette.push_back({182,34,3,255});
 			palette.push_back({215,53,2,255});
@@ -276,25 +289,31 @@ int main(int argc, char** argv){
 		break;
 
 		//Melon
-		case 1:
+		case 3:
 			palette.push_back({243,85,136,255});
 			palette.push_back({255,187,180,255});
 			palette.push_back({113,169,90,255});
 			palette.push_back({0,121,68,255});
 		break;
 
-		//Gradient
-		case 2:
-			for(uint i=0;i<255;i++){
-				palette.push_back({i,i,i,i});
-			}
+		//Matrix
+		case 4:
+			palette.push_back({01,07,01,255});
+			palette.push_back({02,32,02,255});
+			palette.push_back({10,66,11,255});
+			palette.push_back({18,95,19,255});
+			palette.push_back({41,172,43,255});
 		break;
 
-		//Black and white
-		default:
-			palette.push_back({255,255,255,255});
-			palette.push_back({0,0,0,255});
+		//h i b a s c u s
+		case 5:
+			palette.push_back({255,188,66,255});
+			palette.push_back({216,17,89,255});
+			palette.push_back({143,45,86,255});
+			palette.push_back({33,131,121,255});
+			palette.push_back({115,210,222,255});
 		break;
+
 	}
 
 	double palette_offset = 0;

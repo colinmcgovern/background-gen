@@ -1,22 +1,6 @@
-Goal: create perlin noise fire version of image DONE
-Goal: gif output DONE
-Goal: display perlin noise DONE
+High Importance
+-config file usage 
+-sine and cos function need debugging
 
-//Gen 1
-Goal: 	translation function DONE
-Goal: 	sine function hor and vertical
-		see https://youtu.be/zjQik7uwLIQ?t=180
-Goal: 	pallette rotation function. DONE
-Goal: 	gradient pattern generator DONE
-Goal: 	checker pattern generator DONE
-Goal: 	header file to organize. See gif_test.h
-
-Goal: Once all above goals are complete. Organize and save to github
-
-//Backlog
-Goal: translation at arbitrary angle
-Goal: sine at arbitrary angle
-Goal: pattern upload
-Goal: Layered images
-Goal: Once everything is above, make a website interface so users can upload their own patterns and download their custom gifs
-
+Low Importance
+-acceleration
