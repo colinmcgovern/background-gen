@@ -195,7 +195,7 @@ frame::frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
 							palette,heat_map);
 
 	image = translate_image(image,heat_map.size(),
-				heat_map[0].size(),x_offset,y_offset);	
+				heat_map[0].size(),y_offset,x_offset);	
 
 	//del uncomment
 	image = hor_osc(image,heat_map.size(),
@@ -221,24 +221,23 @@ vector<string> split(const string& str, const string& delim){
 
 int main(int argc, char** argv){ 
 
-	int width, height, bpp;
+	int width, height, channels;
 
 	vector<vector<double> > heat_map;
 
-    uint8_t* rgb_image = stbi_load("test2.png", &width, &height, &bpp, 3);
+    uint8_t* rgb_image = stbi_load("images/4.jpeg", &width, &height, &channels, 3);
+
+    uint iter = 0;
 
     for(int i=0;i<width;i++){
     	vector<double> row;
     	for(int j=0;j<height;j++){
     		int sum = 0;
-    		for(int k=0;k<4;k++){
-	    		sum += rgb_image[i*width + j*height + k];
-	    		cout << int(rgb_image[i*width + j*height + k]) << ","; //del
+    		for(int k=0;k<channels;k++){
+	    		sum += rgb_image[iter++];
 	    	}
 	    	row.push_back(double(sum)/(256*3));
-	    	cout << "=" << double(sum)/(256*3) << " "; //del
     	}
-    	cout << endl; //del
     	heat_map.push_back(row);
     }
     stbi_image_free(rgb_image);
@@ -246,47 +245,22 @@ int main(int argc, char** argv){
 	//TODO have these parameters taken from command line
 	// ifstream heat_map_csv("csvs/half.csv");
 
-	const uint pallete_num = 2;
-	const uint pallete_movement_per_frame = 0;
+	const uint pallete_num = 0;
+	const uint pallete_movement_per_frame = 1;
 
-	const double x_movement_per_frame = 0;
-	const double y_movement_per_frame = 0;
+	const double x_movement_per_frame = width/15;
+	const double y_movement_per_frame = height/30;
 
-	const double x_amp = 0;
-	const double x_period = 128;
+	const double x_amp = 2;
+	const double x_period = height*2;
 	const double x_phase_shift_per_frame = 1;
 
 	const double y_amp = 0;
-	const double y_period = 128;
+	const double y_period = height;
 	const double y_phase_shift_per_frame = 1;
 
-	const uint num_frames = 1;
-	const uint delay = 1;
-
-	//loading heatmap from csv
-	//TODO finish this
-
-	// string line;
-	// while (getline(heat_map_csv, line)){
-	// 	vector<double> row;
-	// 	vector<string> row_strings = split(line,",");
-	// 	for(auto &v: row_strings){
-	// 		row.push_back(stod(v));
-	// 	}
-	// 	heat_map.push_back(row);
-	// }
-
-
-	//del
-	//Tesing csv reading
-	// for(int i=0;i<heat_map.size();i++){
-	// 	for(int j=0;j<heat_map[i].size();j++){
-	// 		cout << heat_map[i][j] << " ";
-	// 	}
-	// 	cout << endl;
-	// }
-	// exit(0);
-	//del
+	const uint num_frames = 30;
+	const uint delay = 5;
 
 	vector<RGBA> palette;
 	switch(pallete_num){
