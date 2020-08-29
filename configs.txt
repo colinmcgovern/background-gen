@@ -1,0 +1,22 @@
+//Camo
+const char* input_file = "images/big_noise.jpg";
+
+int width, height, channels;
+uint8_t* rgb_image = stbi_load(input_file, &width, &height, &channels, 3);
+
+const uint num_frames = 1;
+const uint delay = 2;
+
+const uint pallete_num = 7;
+const uint pallete_movement_per_frame = 0;
+
+const double x_movement_per_frame = 0;
+const double y_movement_per_frame = height/num_frames;
+
+const double x_amp = 0;
+const double x_period = 1;
+const double x_phase_shift_per_frame = 1;
+
+const double y_amp = 0;
+const double y_period = 1;
+const double y_phase_shift_per_frame = 1;

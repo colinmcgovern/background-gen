@@ -1,6 +1,5 @@
-High Importance
+
 -config file usage 
 -sine and cos function need debugging
-
-Low Importance
+-multiple images on top each other
 -acceleration

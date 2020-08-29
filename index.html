@@ -3,36 +3,49 @@
 <head>
 <style>
 body {
-  background-image: url("output.gif");
+  background-image: url("example/groovin.gif");
   background-repeat: repeat;
+  image-rendering: pixelated;
+  background-size: 256px 256px;
 }
 </style>
 </head>
 <body>
 
-	This is a demostration of my background generation script. Use the buttons below to try different examples.<br>
+	<div style="background-color: white;">
+	   
+		This is a demostration of my background generation script.<br>
+		Use the buttons below to try different examples.<br>
+		<a href="https://github.com/colinmcgovern/background-gen">Github Link</a><br>
 
-	<button onclick="example1()">Example 1</button><br>
-	<button onclick="example2()">Example 2</button><br>
-	<button onclick="example3()">Example 3</button><br>
-	<button onclick="example4()">Example 4</button><br>
-	<button onclick="example5()">Example 5</button><br>
+		<button onclick="example1()">Example 1 - Groovin</button><br>
+		<button onclick="example2()">Example 2 - Bananas</button><br>
+		<button onclick="example3()">Example 3 - Fish</button><br>
+		<button onclick="example4()">Example 4 - Pulse</button><br>
+		<button onclick="example5()">Example 5 - Face</button><br>
+
+	</div>
 
 	<script>
 		function example1() {
-		  document.body.style.background = "#url('examples/1.gif') repeat";
+		  document.body.style.background = "url('example/groovin.gif')";
+		  document.body.style.backgroundSize = "256px 256px";
 		}
 		function example2() {
-		  document.body.style.background = "#url('examples/2.gif') repeat";
+		  document.body.style.background = "url('example/bananas.gif')";
+		  document.body.style.backgroundSize = "256px 256px";
 		}
 		function example3() {
-		  document.body.style.background = "#url('examples/3.gif') repeat";
+		  document.body.style.background = "url('example/fish.gif')";
+		  document.body.style.backgroundSize = "256px 256px";
 		}
 		function example4() {
-		  document.body.style.background = "#url('examples/4.gif') repeat";
+		  document.body.style.background = "url('example/pulse.gif')";
+		  document.body.style.backgroundSize = "256px 256px";
 		}
 		function example5() {
-		  document.body.style.background = "#url('examples/5.gif') repeat";
+		  document.body.style.background = "url('example/blue_man.gif')";
+		  document.body.style.backgroundSize = "256px 256px";
 		}
 	</script>
 

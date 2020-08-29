@@ -1,5 +1,28 @@
-#include "gif_test.h"
+#include "background-gen.h"
 
+//INPUTS
+const char* input_file = "images/ily.jpg";
+
+int width, height, channels;
+uint8_t* rgb_image = stbi_load(input_file, &width, &height, &channels, 3);
+
+const uint num_frames = 512;
+const uint delay = 3;
+
+const uint pallete_num = 11;
+const double pallete_movement_per_frame = 0.1;
+
+const double x_movement_per_frame = 0;
+const double y_movement_per_frame = 0;
+
+const double x_amp = 2;
+const double x_period = width;
+const double x_phase_shift_per_frame = double(width)/double(num_frames);
+
+const double y_amp = 2;
+const double y_period = height;
+const double y_phase_shift_per_frame = double(height)/double(num_frames);
+//INPUTS
 
 void frame::print(vector<vector<double> > v){
 	for(auto &x: v){
@@ -90,7 +113,7 @@ std::vector<uint8_t> frame::hor_osc(std::vector<uint8_t> input, uint width, uint
 
 	for(size_t i=0;i<width;i++){
 
-		int j_shift = int( -cos((i*period/6.28)+phase_shift)*amp );
+		int j_shift = int( -cos((i*6.28/period)+phase_shift)*amp );
 
 		for(size_t j=0;j<height;j++){
 			uint new_j = (j + j_shift) % height;
@@ -105,20 +128,28 @@ std::vector<uint8_t> frame::vert_osc(std::vector<uint8_t> input, uint width, uin
 
 	std::vector<uint8_t> output(width * height * 4, 0);
 
+	//Rotate 90 degrees
 	vector<vector<RGBA>> simple_input = simplify(input,width,height);
 	vector<vector<RGBA>> simple_output = simplify(input,width,height);
-
 	for(size_t i=0;i<width;i++){
-
-		int i_shift = int( sin((i*period/6.28)+phase_shift)*amp );
-
 		for(size_t j=0;j<height;j++){
-			uint new_i = (i + i_shift) % width;
-			simple_output[i][j] = simple_input[new_i][j];
-		}	
+			simple_output[i][j] = simple_input[j][i];
+		}
 	}
 
-	return desimplify(simple_output);
+	std::vector<uint8_t> to_hor_osc = desimplify(simple_output);
+	std::vector<uint8_t> hor_osc_output = hor_osc(to_hor_osc,width,height, amp, period, phase_shift);
+
+	//Rotate 90 degrees
+	vector<vector<RGBA>> simple_input2 = simplify(hor_osc_output,width,height);
+	vector<vector<RGBA>> simple_output2 = simplify(hor_osc_output,width,height);
+	for(size_t i=0;i<width;i++){
+		for(size_t j=0;j<height;j++){
+			simple_output2[i][j] = simple_input2[j][i];
+		}
+	}
+
+	return desimplify(simple_output2);
 }
 
 vector<RGBA> frame::rotate_palette(vector<RGBA> palette, int palette_offset){
@@ -221,11 +252,7 @@ vector<string> split(const string& str, const string& delim){
 
 int main(int argc, char** argv){ 
 
-	int width, height, channels;
-
 	vector<vector<double> > heat_map;
-
-    uint8_t* rgb_image = stbi_load("images/3.jpeg", &width, &height, &channels, 3);
 
     uint iter = 0;
 
@@ -241,24 +268,6 @@ int main(int argc, char** argv){
     	heat_map.push_back(row);
     }
     stbi_image_free(rgb_image);
-
-
-	const uint pallete_num = 4;
-	const uint pallete_movement_per_frame = 0;
-
-	const double x_movement_per_frame = 0;
-	const double y_movement_per_frame = 0;
-
-	const double x_amp = 4;
-	const double x_period = height/4;
-	const double x_phase_shift_per_frame = 0.1;
-
-	const double y_amp = 0;
-	const double y_period = height;
-	const double y_phase_shift_per_frame = 1;
-
-	const uint num_frames = 30;
-	const uint delay = 10;
 
 	vector<RGBA> palette;
 	switch(pallete_num){
@@ -310,6 +319,64 @@ int main(int argc, char** argv){
 			palette.push_back({143,45,86,255});
 			palette.push_back({33,131,121,255});
 			palette.push_back({115,210,222,255});
+		break;
+
+		//blue
+		case 6:
+			for(uint i=0;i<255;i++){
+				palette.push_back({0,0,i,i});
+			}
+		break;
+
+		//camo
+		case 7:
+			palette.push_back({167,123,78,255});
+			palette.push_back({186,155,119,255});
+			palette.push_back({192,186,169,255});
+			palette.push_back({204,202,188,255});
+		break;
+
+		//pulse
+		case 8:
+			for(uint i=0;i<32;i++){
+			palette.push_back({i*8,0,0,255});
+			}
+			for(uint i=0;i<32;i++){
+			palette.push_back({(32-i)*8,0,0,255});
+			}
+		break;
+
+		//highway lights
+		case 9:
+			for(uint i=0;i<64;i++){
+			palette.push_back({0,0,0,255});
+			}
+			for(uint i=0;i<32;i++){
+			palette.push_back({i*4,i*4,0,255});
+			}
+			for(uint i=0;i<32;i++){
+			palette.push_back({(32-i)*4,(32-i)*4,0,255});
+			}
+		break;
+
+		//blue in and out
+		case 10:
+			for(uint i=0;i<32;i++){
+			palette.push_back({0,0,i*4,255});
+			}
+			for(uint i=0;i<32;i++){
+			palette.push_back({0,0,(32-i)*4,255});
+			}
+		break;
+
+		//rainbow
+		case 11:
+			palette.push_back({255,0,0,255});
+			palette.push_back({255,255,0,255});
+			palette.push_back({0,255,0,255});
+			palette.push_back({0,255,255,255});
+			palette.push_back({0,0,255,255});
+			palette.push_back({255,0,255,255});
 		break;
 
 	}
