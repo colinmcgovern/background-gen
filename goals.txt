@@ -1,5 +1,0 @@
-
--config file usage 
--sine and cos function need debugging
--multiple images on top each other
--acceleration
