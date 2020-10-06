@@ -13,3 +13,5 @@ https://colinmcgovern.github.io/background-gen/index.html
 
 TODO:
 Add the ability for program to use a directory of images instead of just one image.
+Add the ability to have images on top of each other 
+Put this into a qt project so it is easier for people to use
