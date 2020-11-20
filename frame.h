@@ -12,16 +12,30 @@
 #include <functional>   // std::less
 #include <algorithm>    // std::sort, std::includes
 #include <string>
-#include <fstream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <float.h>
+#include <limits.h>
+#include <string.h>
+#include <time.h>
+#include <QString>
+#include <memory>
+#include <utility>
+#include <map>
+
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb/stb_image.h"
 
 #include "gif.h"
+#include "utility.h"
 
 using namespace std;
-
-typedef array<int, 4> RGBA;
 
 class frame{ 
 
