@@ -14,16 +14,11 @@
 #include <string>
 #include <fstream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
-
-#include "gif.h"
-
 using namespace std;
 
 typedef array<int, 4> RGBA;
 
-class frame{ 
+class eb_frame{ 
 
 	private:
 
@@ -41,9 +36,18 @@ class frame{
 
 		vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, vector<vector<double>> heat_map);
 
+		RGBA convert_to_RGBA(string s);
+
 	public: 
-		frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
+		eb_frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
 			vector<RGBA> palette, int palette_offset,
+			int x_offset, int y_offset,
+			double x_amp, double x_period, double x_phase_shift,
+			double y_amp, double y_period, double y_phase_shift
+			);
+
+		eb_frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
+			vector<string> palette, int palette_offset,
 			int x_offset, int y_offset,
 			double x_amp, double x_period, double x_phase_shift,
 			double y_amp, double y_period, double y_phase_shift
