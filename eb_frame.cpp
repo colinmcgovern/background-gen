@@ -222,29 +222,73 @@ eb_frame::eb_frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
 			);
 }
 
-eb_frame::eb_frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
-			vector<RGBA> palette, int palette_offset,
-			int x_offset, int y_offset,
-			double x_amp, double x_period, double x_phase_shift,
-			double y_amp, double y_period, double y_phase_shift
-			){	
+eb_frame::eb_frame(	uint8_t* image,
+					int width,
+					int height,
+					double round_progress,
+					vector<RGBA> palette,
+					int palette_offset,
+					double palette_cycles_per_round,
+					int x_offset,
+					double x_cycles_per_round,
+					int y_offset,
+					double y_cycles_per_round,
+					double x_amp_min,
+					double x_amp_max,
+					double x_amp_cycles_per_round,
+					double x_period_min,
+					double x_period_max,
+					double x_period_cycles_per_round,
+					double x_phase_offset,
+					double x_phase_cycles_per_round,
+					double y_amp_min,
+					double y_amp_max,
+					double y_amp_cycles_per_round,
+					double y_period_min,
+					double y_period_max,
+					double y_period_cycles_per_round,
+					double y_phase_offset,
+					double y_phase_cycles_per_round
+			) : 
+					image(image),
+					width(width),
+					height(height),
+					round_progress(round_progress),
+					palette(palette),
+					palette_offset(palette_offset),
+					palette_cycles_per_round(palette_cycles_per_round),
+					x_offset(x_offset),
+					x_cycles_per_round(x_cycles_per_round),
+					y_offset(),
+					y_cycles_per_round(y_offset),
+					x_amp_min(x_amp_min),
+					x_amp_max(x_amp_max),
+					x_amp_cycles_per_round(x_amp_cycles_per_round),
+					x_period_min(x_period_min),
+					x_period_max(x_period_max),
+					x_period_cycles_per_round(x_period_cycles_per_round),
+					x_phase_offset(x_phase_offset),
+					x_phase_cycles_per_round(x_phase_cycles_per_round),
+					y_amp_min(y_amp_min),
+					y_amp_max(y_amp_max),
+					y_amp_cycles_per_round(y_amp_cycles_per_round),
+					y_period_min(y_period_min),
+					y_period_max(y_period_max),
+					y_period_cycles_per_round(y_period_cycles_per_round),
+					y_phase_offset(y_phase_offset),
+					y_phase_cycles_per_round(y_phase_cycles_per_round)
 
-	palette = rotate_palette(palette,palette_offset);
 
-	image = generate_image(heat_map.size(),heat_map[0].size(),
-							palette,heat_map);
 
-	image = translate_image(image,heat_map.size(),
-				heat_map[0].size(),y_offset,x_offset);	
+	{	
 
-	//del uncomment
-	image = hor_osc(image,heat_map.size(),
-				heat_map[0].size(),x_amp,x_period,x_phase_shift);
-	image = vert_osc(image,heat_map.size(),
-				heat_map[0].size(),y_amp,y_period,y_phase_shift);
+	apply_palette();
+	apply_hor_osc();
+	apply_vert_osc();
+	apply_translation();
 }
 
-vector<string> split(const string& str, const string& delim){
+vector<string> split(const string& str(), const string& delim){
     vector<string> tokens;
     size_t prev = 0, pos = 0;
     do

@@ -13,6 +13,7 @@
 #include <algorithm>    // std::sort, std::includes
 #include <string>
 #include <fstream>
+#include <memory>
 
 using namespace std;
 
@@ -22,41 +23,77 @@ class eb_frame{
 
 	private:
 
-		//Transformers
-		vector<uint8_t> translate_image(std::vector<uint8_t> input, uint width, uint height, int x_offset, int y_offset);
-		
-		vector<uint8_t> hor_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift);
-		vector<uint8_t> vert_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift);
-		
-		vector<RGBA> rotate_palette(vector<RGBA> palette, int palette_offset);
-
 		//Helper Functions
-		vector<vector<RGBA>> simplify(vector<uint8_t> input, uint width, uint height);
-		vector<uint8_t> desimplify(vector<vector<RGBA>> input);
-
-		vector<uint8_t> generate_image(int width, int height, vector<RGBA> palette, vector<vector<double>> heat_map);
-
+		vector<vector<RGBA>> simplify(uint8_t* image);
+		uint8_t* image desimplify(vector<vector<RGBA>> input);
 		RGBA convert_to_RGBA(string s);
 
+		//Transforms
+		void apply_palette();
+		void apply_hor_osc();
+		void apply_vert_osc();
+		void apply_translation();
+
+		uint8_t* image;
+		int width;
+		int height;
+		double round_progress;
+		vector<RGBA> palette;
+		int palette_offset;
+		double palette_cycles_per_round;
+		int x_offset;
+		double x_cycles_per_round;
+		int y_offset;
+		double y_cycles_per_round;
+		double x_amp_min;
+		double x_amp_max;
+		double x_amp_cycles_per_round;
+		double x_period_min;
+		double x_period_max;
+		double x_period_cycles_per_round;
+		double x_phase_offset;
+		double x_phase_cycles_per_round;
+		double y_amp_min;
+		double y_amp_max;
+		double y_amp_cycles_per_round;
+		double y_period_min;
+		double y_period_max;
+		double y_period_cycles_per_round;
+		double y_phase_offset;
+		double y_phase_cycles_per_round;
+
 	public: 
-		eb_frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
-			vector<RGBA> palette, int palette_offset,
-			int x_offset, int y_offset,
-			double x_amp, double x_period, double x_phase_shift,
-			double y_amp, double y_period, double y_phase_shift
+		eb_frame(
+			uint8_t* input, int width, int height,
+			double round_progress = 0.0,
+			vector<RGBA> palette = {}, int palette_offset=0, double palette_cycles_per_round=0,
+			int x_offset=0, double x_cycles_per_round=0,
+			int y_offset=0, double y_cycles_per_round=0,
+			double x_amp_min=0, double x_amp_max=0, double x_amp_cycles_per_round=0,
+			double x_period_min=0, double x_period_max=0, double x_period_cycles_per_round=0,
+			double x_phase_offset=0, double x_phase_cycles_per_round=0,
+			double y_amp_min=0, double y_amp_max=0, double y_amp_cycles_per_round=0,
+			double y_period_min=0, double y_period_max=0, double y_period_cycles_per_round=0,
+			double y_phase_offset=0, double y_phase_cycles_per_round=0
 			);
 
-		eb_frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
-			vector<string> palette, int palette_offset,
-			int x_offset, int y_offset,
-			double x_amp, double x_period, double x_phase_shift,
-			double y_amp, double y_period, double y_phase_shift
+		eb_frame(
+			uint8_t* input, int width, int height,
+			double round_progress = 0.0,
+			vector<string> palette = {}, int palette_offset=0, double palette_cycles_per_round=0,
+			int x_offset=0, double x_cycles_per_round=0,
+			int y_offset=0, double y_cycles_per_round=0,
+			double x_amp_min=0, double x_amp_max=0, double x_amp_cycles_per_round=0,
+			double x_period_min=0, double x_period_max=0, double x_period_cycles_per_round=0,
+			double x_phase_offset=0, double x_phase_cycles_per_round=0,
+			double y_amp_min=0, double y_amp_max=0, double y_amp_cycles_per_round=0,
+			double y_period_min=0, double y_period_max=0, double y_period_cycles_per_round=0,
+			double y_phase_offset=0, double y_phase_cycles_per_round=0
 			);
 
-	//Utitity
-	void print(vector<uint8_t> input, uint width, uint height);
-	void print(vector<vector<double> > v);
+		eb_frame operator+(const eb_frame& lhs, const eb_frame& rhs);
 
+		uint8_t* get_image() const {return image;}
 };
 
 

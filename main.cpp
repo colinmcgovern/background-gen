@@ -27,7 +27,7 @@ using namespace std;
 int main(int argc, char** argv){
 
 	//INPUTS
-	const char* input_file = "images/landscape.jpg";
+	const char* input_file = "images/banana.jpg";
 
 	int width, height, channels;
 	uint8_t* rgb_image = stbi_load(input_file, &width, &height, &channels, 3);
