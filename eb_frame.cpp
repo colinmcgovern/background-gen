@@ -12,31 +12,19 @@ RGBA eb_frame::convert_to_RGBA(string s){
     return output;
 }
 
-void eb_frame::print(vector<vector<double> > v){
-	for(auto &x: v){
-		for(auto &y: x){
-			cout << y << " ";
-		}
-		cout << endl;
-	}
+vector<RGBA> eb_frame::convert_to_RGBA(vector<string> s){
+    
+    vector<RGBA> output;
+        
+    for(auto v : s){
+    	output.push_back(convert_to_RGBA(v));
+    }
+    
+    return output;
 }
 
-void eb_frame::print(vector<uint8_t> input, uint width, uint height){
-	uint index = 0;
-	for(size_t i=0;i<width;i++){
-		for(size_t j=0;j<height;j++){
-			for(size_t k=0;k<4;k++){
-				cout << int(input[index++]);
-				cout << ",";
-			}
-			cout << " ";
-		}
-		cout << endl;
-	}
-}
-
-vector<vector<RGBA>> eb_frame::simplify(vector<uint8_t> input, uint width,
-									 uint height){
+vector<vector<RGBA>> eb_frame::simplify(uint8_t* input, int width,
+									 int height){
 
 	vector<vector<RGBA>> output;
 
@@ -64,162 +52,66 @@ vector<vector<RGBA>> eb_frame::simplify(vector<uint8_t> input, uint width,
 	return output;
 }
 
-vector<uint8_t> eb_frame::desimplify(vector<vector<RGBA>> input){
-	vector<uint8_t> output;
+uint8_t* eb_frame::desimplify(vector<vector<RGBA>> input){
+
+	if(input.size()==0 || input[0].size()==0){
+		uint8_t* output;
+		return output;
+	}
+
+	uint8_t* output = (uint8_t*)malloc(	 sizeof(uint8_t) *
+										 input.size() *
+								  		 input[0].size() * 4);
 	for(size_t i=0;i<input.size();i++){
 		for(size_t j=0;j<input[i].size();j++){
 			for(size_t k=0;k<input[i][j].size();k++){
-				output.push_back(input[i][j][k]);
+				int index = k + i * 4 + j * 4 * input.size();
+				output[index] = input[i][j][k];
 			}
 		}
 	}
 	return output;
 }
 
-//TODO needs tesing
-std::vector<uint8_t> eb_frame::translate_image(std::vector<uint8_t> input, uint width, uint height, 
-											int x_offset, int y_offset){
-	std::vector<uint8_t> output(width * height * 4, 0);
+void eb_frame::apply_palette(){
 
-	vector<vector<RGBA>> simple_input = simplify(input,width,height);
-	vector<vector<RGBA>> simple_output = simplify(input,width,height);
+	vector<vector<RGBA>> my_image = simplify(image,width,height);
 
-	for(size_t i=0;i<width;i++){
-		for(size_t j=0;j<height;j++){
-			simple_output[i][j] = simple_input[(i+x_offset)%width][(j+y_offset)%height];
-		}	
-	}
+	for(int i=0;i<my_image.size();i++){
+    	vector<double> row;
+    	for(int j=0;j<my_image[i].size();j++){
+    		
+    		double sum = 0;
+    		for(int k=0;k<3;k++){
+	    		sum += my_image[i][j][k];
+	    	}
+	    	sum /= 256*3;
 
-	return desimplify(simple_output);
+	    	int starting_palette_index = sum * (palette.size()-1);
+	    	int animation_offset = 	(palette.size()-1) * 
+	    							palette_cycles_per_round *
+	    							round_progress;
+			
+			int palette_index = starting_palette_index + animation_offset
+								+ palette_offset;
+
+	    	my_image[i][j] = palette[palette_index];
+    	}
+    }
+
+	image = desimplify(my_image);
 }
 
-std::vector<uint8_t> eb_frame::hor_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift){
-	std::vector<uint8_t> output(width * height * 4, 0);
+void eb_frame::apply_hor_osc(){
 
-	vector<vector<RGBA>> simple_input = simplify(input,width,height);
-	vector<vector<RGBA>> simple_output = simplify(input,width,height);
-
-	for(size_t i=0;i<width;i++){
-
-		int j_shift = int( -cos((i*6.28/period)+phase_shift)*amp );
-
-		for(size_t j=0;j<height;j++){
-			uint new_j = (j + j_shift) % height;
-			simple_output[i][j] = simple_input[i][new_j];
-		}	
-	}
-
-	return desimplify(simple_output);
 }
 
-std::vector<uint8_t> eb_frame::vert_osc(std::vector<uint8_t> input, uint width, uint height, double amp, double period, double phase_shift){
+void eb_frame::apply_vert_osc(){
 
-	std::vector<uint8_t> output(width * height * 4, 0);
-
-	//Rotate 90 degrees
-	vector<vector<RGBA>> simple_input = simplify(input,width,height);
-	vector<vector<RGBA>> simple_output = simplify(input,width,height);
-	for(size_t i=0;i<width;i++){
-		for(size_t j=0;j<height;j++){
-			simple_output[i][j] = simple_input[j][i];
-		}
-	}
-
-	std::vector<uint8_t> to_hor_osc = desimplify(simple_output);
-	std::vector<uint8_t> hor_osc_output = hor_osc(to_hor_osc,width,height, amp, period, phase_shift);
-
-	//Rotate 90 degrees
-	vector<vector<RGBA>> simple_input2 = simplify(hor_osc_output,width,height);
-	vector<vector<RGBA>> simple_output2 = simplify(hor_osc_output,width,height);
-	for(size_t i=0;i<width;i++){
-		for(size_t j=0;j<height;j++){
-			simple_output2[i][j] = simple_input2[j][i];
-		}
-	}
-
-	return desimplify(simple_output2);
 }
 
-vector<RGBA> eb_frame::rotate_palette(vector<RGBA> palette, int palette_offset){
-	vector<RGBA> output;
-	for(size_t i=0;i<palette.size();i++){
-		output.push_back(palette[(i+palette_offset)%palette.size()]);
-	}
-	return output;
-}
+void eb_frame::apply_translation(){
 
-vector<uint8_t> eb_frame::generate_image(int width, int height,
-				 vector<RGBA> palette, vector<vector<double>> heat_map){
-
-	std::vector<uint8_t> output(width * height * 4, 0);
-
-	uint index = 0;
-
-	for(size_t i=0;i<width;i++){
-		for(size_t j=0;j<height;j++){
-
-			uint red=0;
-			uint green=0;
-			uint blue=0;
-			uint a=0;
-
-			double intensity = heat_map[i][j];
-
-			for(size_t k=0;k<palette.size();k++){
-				if(intensity<double(k+1)/double(palette.size())){
-					red = palette[k][0];
-					green = palette[k][1];
-					blue = palette[k][2];
-					a = palette[k][3];
-					break;
-				}
-			}
-
-			for(size_t k=0;k<4;k++){
-
-				switch(k){
-					case 0:
-						output[index] = red;
-						break;
-					case 1:
-						output[index] = green;
-						break;
-					case 2:
-						output[index] = blue;
-						break;
-					default:
-						output[index] = a;
-						break;
-				}
-
-				index++;
-
-			}
-		}
-	}
-
-	return output;
-}
-
-
-eb_frame::eb_frame(vector<uint8_t> &image, vector<vector<double> > heat_map,
-			vector<string> palette, int palette_offset,
-			int x_offset, int y_offset,
-			double x_amp, double x_period, double x_phase_shift,
-			double y_amp, double y_period, double y_phase_shift
-			){	
-
-	vector<RGBA> new_palette;
-
-	for(auto v : palette){
-		new_palette.push_back(convert_to_RGBA(v));
-	}
-
-	eb_frame( image, heat_map, new_palette, palette_offset,
-			x_offset, y_offset,
-			x_amp, x_period, x_phase_shift,
-			y_amp, y_period, y_phase_shift
-			);
 }
 
 eb_frame::eb_frame(	uint8_t* image,
@@ -288,18 +180,18 @@ eb_frame::eb_frame(	uint8_t* image,
 	apply_translation();
 }
 
-vector<string> split(const string& str(), const string& delim){
-    vector<string> tokens;
-    size_t prev = 0, pos = 0;
-    do
-    {
-        pos = str.find(delim, prev);
-        if (pos == string::npos) pos = str.length();
-        string token = str.substr(prev, pos-prev);
-        if (!token.empty()) tokens.push_back(token);
-        prev = pos + delim.length();
-    }
-    while (pos < str.length() && prev < str.length());
-    return tokens;
-}
+// vector<string> split(const string& str(), const string& delim){
+//     vector<string> tokens;
+//     size_t prev = 0, pos = 0;
+//     do
+//     {
+//         pos = str.find(delim, prev);
+//         if (pos == string::npos) pos = str.length();
+//         string token = str.substr(prev, pos-prev);
+//         if (!token.empty()) tokens.push_back(token);
+//         prev = pos + delim.length();
+//     }
+//     while (pos < str.length() && prev < str.length());
+//     return tokens;
+// }
 
