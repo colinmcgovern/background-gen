@@ -69,7 +69,7 @@ class eb_frame{
 		eb_frame(
 			uint8_t* input, int width, int height,
 			double round_progress = 0.0,
-			vector<RGBA> palette = {}, int palette_offset=0, double palette_cycles_per_round=0,
+			vector<RGBA> palette = {{0,0,0,0},{255,255,255,255}}, int palette_offset=0, double palette_cycles_per_round=0,
 			int x_offset=0, double x_cycles_per_round=0,
 			int y_offset=0, double y_cycles_per_round=0,
 			double x_amp_min=0, double x_amp_max=0, double x_amp_cycles_per_round=0,

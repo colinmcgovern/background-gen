@@ -39,7 +39,9 @@ vector<vector<RGBA>> eb_frame::simplify(uint8_t* input, int width,
 			RGBA new_val;
 
 			for(size_t k=0;k<4;k++){
+				//cout << index << ": " << i << " " << j << " " << k << endl; //del
 				new_val[k] = input[index++];
+
 			}
 
 			new_row.push_back(new_val);
@@ -61,12 +63,14 @@ uint8_t* eb_frame::desimplify(vector<vector<RGBA>> input){
 
 	uint8_t* output = (uint8_t*)malloc(	 sizeof(uint8_t) *
 										 input.size() *
-								  		 input[0].size() * 4);
+								  		 input[0].size() * 
+								  		 input[1].size() );
 	for(size_t i=0;i<input.size();i++){
 		for(size_t j=0;j<input[i].size();j++){
 			for(size_t k=0;k<input[i][j].size();k++){
 				int index = k + i * 4 + j * 4 * input.size();
 				output[index] = input[i][j][k];
+				//cout << "desimplify: " << index << ": " << i << " " << j << " " << k << endl; //del
 			}
 		}
 	}
@@ -77,25 +81,34 @@ void eb_frame::apply_palette(){
 
 	vector<vector<RGBA>> my_image = simplify(image,width,height);
 
+	cout << "my_image " << width << " " << height << endl; //del
+
 	for(int i=0;i<my_image.size();i++){
     	vector<double> row;
     	for(int j=0;j<my_image[i].size();j++){
+
+    		cout << i << " " << j << endl; //del
     		
     		double sum = 0;
     		for(int k=0;k<3;k++){
+    			//cout << i << " " << j << " " << k << endl; //del
 	    		sum += my_image[i][j][k];
 	    	}
 	    	sum /= 256*3;
 
 	    	int starting_palette_index = sum * (palette.size()-1);
-	    	int animation_offset = 	(palette.size()-1) * 
+	    	int animation_offset = 	double(palette.size()) * 
 	    							palette_cycles_per_round *
 	    							round_progress;
+
+	    	//cout << animation_offset << ": " << double(palette.size()-1) << " " << palette_cycles_per_round << " " << round_progress << endl; //del
 			
 			int palette_index = starting_palette_index + animation_offset
 								+ palette_offset;
 
-	    	my_image[i][j] = palette[palette_index];
+			cout << starting_palette_index << " " << animation_offset << " " << palette_index << " " << palette_cycles_per_round << " " << round_progress << endl; //del
+
+	    	my_image[i][j] = palette[palette_index%(palette.size())];
     	}
     }
 
@@ -172,9 +185,35 @@ eb_frame::eb_frame(	uint8_t* image,
 
 
 
-	{	
+	{
+
+	//TESTS
+	if(image!=desimplify(simplify(image,width,height))){
+
+		//del
+		// uint8_t* image_before = image;
+		// uint8_t* image_after = desimplify(simplify(image,width,height));
+
+		// uint index = 0;
+
+		// for(uint i=0;i<width;i++){
+		// 	for(uint j=0;j<width;j++){
+		// 		for(uint k=0;k<4;k++){
+		// 			cout << i << " " << j << " " << k << ":" << to_string(image_before[index]) << " " << to_string(image_after[index]) << endl; //del
+		// 		}
+		// 	}
+		// }
+		//del
+
+		cout << "desimplify simplify fail" << endl;
+		//exit(0);
+	}
+	//TESTS	
+
+	//cout << "a" << endl; //del
 
 	apply_palette();
+	//cout << "b" << endl; //del
 	apply_hor_osc();
 	apply_vert_osc();
 	apply_translation();
