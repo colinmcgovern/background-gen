@@ -24,61 +24,34 @@ class eb_frame{
 	private:
 
 		//Helper Functions
-		static vector<vector<RGBA>> simplify(uint8_t* image, int width,
-									 int height);
-		static uint8_t* desimplify(vector<vector<RGBA>> input);
+		// static vector<vector<RGBA>> simplify(uint8_t* image, int width,
+		// 							 int height);
+		// static uint8_t* desimplify(vector<vector<RGBA>> input);
+
+		uint calc_index(int x, int y);
+
 		static RGBA convert_to_RGBA(string s);
 		static vector<RGBA> convert_to_RGBA(vector<string> s);
-
-		//Transforms
-		void apply_palette();
-		void apply_hor_osc();
-		void apply_vert_osc();
-		void apply_translation();
-
+		
 		uint8_t* image;
 		const int width;
 		const int height;
 		const double round_progress;
-		const vector<RGBA> palette;
-		const int palette_offset;
-		const double palette_cycles_per_round;
-		const int x_offset;
-		const double x_cycles_per_round;
-		const int y_offset;
-		const double y_cycles_per_round;
-		const double x_amp_min;
-		const double x_amp_max;
-		const double x_amp_cycles_per_round;
-		const double x_period_min;
-		const double x_period_max;
-		const double x_period_cycles_per_round;
-		const double x_phase_offset;
-		const double x_phase_cycles_per_round;
-		const double y_amp_min;
-		const double y_amp_max;
-		const double y_amp_cycles_per_round;
-		const double y_period_min;
-		const double y_period_max;
-		const double y_period_cycles_per_round;
-		const double y_phase_offset;
-		const double y_phase_cycles_per_round;
 
 	public: 
 
-		eb_frame(
-			uint8_t* input, int width, int height,
-			double round_progress = 0.0,
-			vector<RGBA> palette = {{0,0,0,0},{255,255,255,255}}, int palette_offset=0, double palette_cycles_per_round=0,
-			int x_offset=0, double x_cycles_per_round=0,
-			int y_offset=0, double y_cycles_per_round=0,
-			double x_amp_min=0, double x_amp_max=0, double x_amp_cycles_per_round=0,
-			double x_period_min=0, double x_period_max=0, double x_period_cycles_per_round=0,
-			double x_phase_offset=0, double x_phase_cycles_per_round=0,
-			double y_amp_min=0, double y_amp_max=0, double y_amp_cycles_per_round=0,
-			double y_period_min=0, double y_period_max=0, double y_period_cycles_per_round=0,
-			double y_phase_offset=0, double y_phase_cycles_per_round=0
-			);
+		eb_frame(uint8_t* input, int width, int height, double round_progress);
+
+		//Transforms
+		void apply_palette(vector<RGBA> palette , int palette_offset, double palette_cycles_per_round);
+		void apply_hor_osc(double x_amp_min, double x_amp_max, double x_amp_cycles_per_round,
+			double x_period_min, double x_period_max, double x_period_cycles_per_round,
+			double x_phase_offset, double x_phase_cycles_per_round);
+		void apply_vert_osc(double y_amp_min, double y_amp_max, double y_amp_cycles_per_round,
+			double y_period_min, double y_period_max, double y_period_cycles_per_round,
+			double y_phase_offset, double y_phase_cycles_per_round);
+		void apply_translation(int x_offset, double x_cycles_per_round, int y_offset, double y_cycles_per_round);
+
 
 		//eb_frame operator+(const eb_frame& lhs, const eb_frame& rhs);
 
